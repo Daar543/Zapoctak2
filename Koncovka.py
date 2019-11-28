@@ -1,4 +1,4 @@
-#ROZMĚRY ŠACHOVNICE
+#ČÁST 1 - VYGENEROVÁNÍ ROZMĚRŮ ŠACHOVNICE A UMÍSTĚNÍ FIGUR NA POLE
 
 def sloupec(x):
     return chr(ord("a")-1+x)
@@ -15,7 +15,7 @@ maxradek = radky
 print ("Rohy: a1, ",maxsloupec,"1, ",maxsloupec,maxradek,", a",maxradek,sep="") 
 
 #GENEROVÁNÍ FIGUR
-
+pocetfigur = 3
 #seznam figur
 pozice=[]
 Kb = None
@@ -47,6 +47,23 @@ def umisti(pozice,n):
 #for i in range(len(pozice)):
 umisti(pozice,0)
 #print (pozice)
-for i in range(len(pozice)):
-    umisti(pozice,i)
-print(pozice)
+
+#zopakuji postup pro všechny další figury, přičemž zachovávám i možnost, kdy všechny fugury nebudou na šachovnici
+for k in range(pocetfigur-1):
+    for i in range(len(pozice)):
+        umisti(pozice,i)
+soubor = open("vsechnypozice.txt","w") #uložíme do souboru
+for k in range(len((pozice))):
+    soubor.write(str(pozice[k]))
+    soubor.write("\n")
+soubor.close()
+
+###ČÁST 2 - ZRUŠENÍ NELEGÁLNÍCH POZIC
+
+# figury na stejných polích
+
+# hrajeme bez krále
+
+### ČÁST 3 - MOŽNÉ TAHY (definice)
+
+#vzájemný šach
