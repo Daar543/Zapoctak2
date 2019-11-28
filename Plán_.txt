@@ -1,0 +1,20 @@
+Plán:
+
+Program:
+
+1. Rozmery šachovnice, barva silnejší strany
+
+2. Vygeneruje všechny pozice dvou králu, eliminuje nelegální
+
+3. Pridá vež a zkontroluje, kdy je král v šachu
+
+4. Rozdelí pozice podle toho, kdo je na tahu (je-li šach, pak pouze jeden hrác)
+
+5. Definuje všechny možné tahy
+
+6. Jednoznacne ohodnocené pozice: Bez veže/pat = remíza, mat = výhra
+
+7. Jinak postupuje zpetne; krále sebrat nejde, takže stací provést jakýkoli tah
+ (s výjimkou "ze šachu do šachu") a tento tah se zaznamená; napríklad Vf3-a3 se provede, nová pozice se zaznamená a zapíše se, že nejefektivnejší tah je Va3-f3
+
+8. Teoreticky se dá nejkratší mat provést za 16 tahu na 8x8 šachovnici, takže po 2x16 tazích lze testování ukoncit
