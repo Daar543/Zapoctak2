@@ -129,6 +129,8 @@ def Koncovka(rdk,slp):
             return n
     def Rozmisteni(databaze,cislo):
         return databaze[cislo]
+    def Barva (databaze,cislo,figura):
+        Charakteristika(databaze,cislo,figura,3)
     #KRÁL
     
     #Všechny tahy
@@ -149,12 +151,12 @@ def Koncovka(rdk,slp):
                   
         #print (numk)
         OdmazKonec(numk)
-        print(numk)
+        #print(numk)
         return numk
     #TahKralem("b4") #tes
     #input()
 
-    #Kontrola obsazených polí
+    #Kontrola obsazených polí - obecná
     def Kontrola(jaketahy,vsechnytahy,rozmisteni,barva):
         chcemetahy = []*len(vsechnytahy)
         if jaketahy == "neobsazene":
@@ -163,16 +165,19 @@ def Koncovka(rdk,slp):
                     chcemetahy.append(vsechnytahy[i])
         elif jaketahy == "brani":
             for i in range(len(vsechnytahy)):
-                if Obsazene(vsechnytahy[i],rozmisteni,barva) == (True,1):
+                if Obsazene(vsechnytahy[i],rozmisteni,barva) == (True,1): #opačná barva
                     chcemetahy.append(vsechnytahy[i])
         elif jaketahy == "nemozne":
             for i in range(len(vsechnytahy)):
-                if Obsazene(vsechnytahy[i],rozmisteni,barva) == (True,0):
+                if Obsazene(vsechnytahy[i],rozmisteni,barva) == (True,0): #stejná barva
                     chcemetahy.append(vsechnytahy[i])
         else:
             print("Error - Jaké tahy?")
             input()
         return chcemetahy
+
+    #Šablony pro tah králem
+    
     def TahKralemSablona1(databaze, cislopozice, poradi): #bude vracet: všechny tahy, rozmístění, barvu
         return(TahKralem(Charakteristika(databaze,cislopozice,poradi,2)))
     def TahKralemSablona2(databaze, cislopozice, poradi):
@@ -181,6 +186,127 @@ def Koncovka(rdk,slp):
         return(Charakteristika(databaze,cislopozice,poradi,3))
     def TahKralemSablonaFull(jaketahy,databaze,cislopozice,poradi):
         return(Kontrola(jaketahy,TahKralemSablona1(databaze, cislopozice, poradi),TahKralemSablona2(databaze, cislopozice, poradi),TahKralemSablona3(databaze, cislopozice, poradi)))
-    print (Rozmisteni(pozice,515))
-    print(TahKralemSablonaFull("neobsazene",pozice,515,0))
+
+    def Test(cislo,figura):
+        print (Rozmisteni(pozice,cislo))
+        print ("Figura na poli ",Charakteristika(pozice,cislo,figura,2))
+        print("Neobsazene:",TahKralemSablonaFull("neobsazene",pozice,cislo,figura))
+        print("Brani:",TahKralemSablonaFull("brani",pozice,cislo, figura))
+        print("Nemozne:",TahKralemSablonaFull("nemozne",pozice,cislo, figura))
+    def TestObecne(cislo,figura):
+        print (Rozmisteni(pozice,cislo))
+        print ("Figura na poli ",Charakteristika(pozice,cislo,figura,2))
+        print("Neobsazene:",TahXSablonaFull("neobsazene",pozice,cislo,figura))
+        print("Brani:",TahXSablonaFull("brani",pozice,cislo, figura))
+        print("Nemozne:",TahXSablonaFull("nemozne",pozice,cislo, figura))
+    # Obecná šablona
+    
+    def TahXSablonaFull(jaketahy,databaze,cislopozice,poradi):
+        if poradi == 0 or poradi == 1:
+            return TahKralemSablonaFull(jaketahy,databaze,cislopozice,poradi)
+        if poradi == 2:
+            return TahVeziSablonaFull(jaketahy,databaze,cislopozice,poradi)
+        
+    #Šablony pro tah věží
+        
+    def TahVeziSablona1(databaze, cislopozice, poradi): #bude vracet: všechny tahy, rozmístění, barvu
+        return(TahVezi(Charakteristika(databaze,cislopozice,poradi,2)))
+    def TahVeziSablona2(databaze, cislopozice, poradi):
+        return(Charakteristika(databaze,cislopozice,poradi,1))
+    def TahVeziSablona3(databaze, cislopozice, poradi):
+        return(Charakteristika(databaze,cislopozice,poradi,3))
+    def TahVeziSablonaFull(jaketahy,databaze,cislopozice,poradi):
+        return(Kontrola(jaketahy,TahVeziSablona1(databaze, cislopozice, poradi),TahVeziSablona2(databaze, cislopozice, poradi),TahVeziSablona3(databaze, cislopozice, poradi)))
+    
+    #Další funkce
+    def Vyhledejpole(databaze,poradi,pole):
+        j = (databaze[poradi])[:]
+        for i in range(len(j)):
+            if j[i] == pole:
+                return i
+        return False
+    def Brani(databaze,cislopozice,i): #později
+        j = (databaze[cislopozice])[:]
+        if i == 0 or i == 1:
+            return TahKralemSablonaFull("brani",databaze,cislopozice,i)
+        if i == 2:
+            if j[2]!="X":
+                return TahVeziSablonaFull("brani",databaze,cislopozice,i)
+    #později
+    #DOŘEŠIT
+
+    #Jde-li král do šachu, pak se jedná o nemožný tah - dodělat!
+    def DoSachuqm(databaze,cislopozice,seznamtahu,figura): #vždy se jedná o krále
+        j = (databaze[cislopozice])[:]
+        for i in range(len(seznamtahu)):
+            j[figura] = seznamtahu[i] #první nebo druhá figura
+            if j in databaze:
+                p = databaze.find(j)
+                print (p)
+                print (Jesach(databaze,p))
+                input()
+                if figura == 0 and Jesach(databaze,p) == "Bily":
+                    return
+        return
+    #později, až vyřeším přesun
+    #Řeším, jestli je v dané pozici šach 
+    def JeSach(databaze,cislopozice):
+        sach = ""
+        j = (databaze[cislopozice])[:]
+        k = 0 #bílý král
+        for i in range(1,len(j)):
+            if j[i]!="X":
+                if j[k] in Brani(databaze,cislopozice,i): #může-li být král sebrán figurou...
+                    sach = "Bily"
+                    break
+        k = 1 #cerny kral
+        for i in range(0,len(j)):
+            if j[i]!="X":
+                if j[k] in Brani(databaze,cislopozice,i): #totéž
+                    if sach == "Bily":
+                        return "Oba"
+                    else:
+                        return "Cerny"
+        if sach == "Bily":
+            return "Bily"
+        else:
+            return "Nikdo"
+    #VĚŽ
+    def TahVezi(umk): #umisteni veze
+        if umk == "X":
+            return 
+        rada = int(umk[1])
+        sloupec = desloupec(umk[0])
+        n = 0
+        numk = [None]*(radky+sloupce) #vez muze o neomezeny pocet poli jednim smerem 
+        for i in range(-sloupce,sloupce):  #dozadu o tolik rad, na kolikate je (jednotky neresim, ZEFEKTIVNIT)
+            if i !=0: 
+                if sloupec +i <= sloupce and sloupec + i > 0:
+                        numk[n] = [sloupec + i, rada]
+                        numk[n] = NazevPole(numk[n])
+                        n += 1
+        for j in range(-radky,radky):
+            if j!=0:   
+                if rada + j <= radky and rada + j > 0:
+                    numk[n] = [sloupec, rada+j]
+                    numk[n] = NazevPole(numk[n])
+                    n += 1
+        #print (numk)
+        OdmazKonec(numk)
+        #print(numk)
+        return numk
+    #TahVezi("b4") #tes
+    #input() 
+            
+            
+    def testsach(cispoz,fig=0):
+        for i in range(3):
+            TestObecne(cispoz,i)
+        if JeSach(pozice,cispoz) != "Nikdo":
+                  input()
+        print(JeSach(pozice,cispoz))
+    for i in range(500,700):
+        testsach(i)
+    
+    
 Koncovka(4,4)
