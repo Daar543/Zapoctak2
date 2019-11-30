@@ -158,15 +158,39 @@ def Koncovka(rdk,slp):
             return True
         return False
 
+    #Rozdělení polí
+    def Charak(databaze,cislo,figura,co): #co bude text
+        vysledek = []
+        j = Celapozice(databaze,cislo)
+        r = TahyNeom(databaze,cislo,figura) # r - všechna pole
+        if co == "praz":
+            for i in range(len(r)):
+                if r[i] not in j: #jestli na daném místě není žádná figura
+                    vysledek.append(r[i])
+        elif co == "soup": #soupeřova
+            for i in range(len(r)):
+                if r[i] in j: #jestli na daném místě je nějaká figura
+                    if (j.index(r[i]))%2 != Barvafigury(figura): #odlišná barva
+                        vysledek.append(r[i])
+        elif co == "vlas": #vlastni
+            for i in range(len(r)):
+                if r[i] in j: #jestli na daném místě je nějaká figura
+                    if (j.index(r[i]))%2 == Barvafigury(figura): #stejná barva
+                        vysledek.append(r[i])
+        elif co == "obsa": #jakákoli cizí
+            for i in range(len(r)):
+                if r[i] in j: #jestli na daném místě je nějaká žádná figura
+                    vysledek.append(r[i])
+        elif co == "vse": #všechna pole
+            f = r[:]
+            return f
+        return vysledek
     def TahyNeom(databaze,cislo,figura):
-        k = Polefigury(databaze,cislo,figura)
-        l = Barvafigury(figura)
         if figura == 0 or figura == 1:
             return TahKralem(Polefigury(databaze,cislo,figura))
         elif figura == 2:
             return TahVezi(Polefigury(databaze,cislo,figura))
         return
-
     #VYHLEDÁVACÍ FUNKCE
     def Celapozice(databaze,cislo):
         return databaze[cislo]
@@ -175,10 +199,52 @@ def Koncovka(rdk,slp):
     def Barvafigury(index):
         return (index%2)
 
-    #PŘESKOČIT OBSAZENÁ POLE
+    #PŘESKOČIT OBSAZENÁ POLE - VĚŽ
+    def BlokVezi(databaze,cislo,index): #mám dvě skupiny: blokovaná a všechna možná pole, všechna ostatní pole na šachovnici můžu ignorovat
+        obs = Charak(databaze,cislo,index,"obsa") #blok
+        vse = TahyNeom(databaze,cislo,index) #možná
+        #můžu využít toho, že věž se pohybuje jenom po řadě nebo sloupci, takže rozdělím na dva případy
+        rad = [] #stejná řada, mění se sloupec
+        sloup = [] #stejný sloupec, mění se řada
+        j = vse[0] 
+        #jedná se o první pole, kam může naše věž 
+        for i in range(len(obs)):
+            k = obs[i]
+            if k[1] == j[1]: #index řady
+                rad.append(k) #je-li zakázané pole na stejné řadě jako věž, řadí se do první skupiny, jinak (je na stejném sloupci) se řadí do druhé skupiny
+            else:
+                sloup.append(k) #jiný případ nemůže nastat
+        #print ("Blokrada:",rad)
+        #print ("Bloksloup:",sloup)
 
+        #Je-li pole blokované, pak musí být všechna pole za ním nepřístupná
+        u = Polefigury(databaze,cislo,index)
 
+        blokrada = []
+        for i in range(len(rad)): #je to na řadě, ale mění se SLOUPEC
+            j = rad[i]
+            j = desloupec(j[0])
+            if desloupec(u[0]) < j: #figura je nalevo, ruší se pole napravo
+                for k in range(j+1,sloupce+1):
+                    blokrada.append(sloupec(k)+u[1]) #seznam polí
+            elif desloupec(u[0]) > j: #figura je napravo, ruší se pole nalevo
+                for k in range(1,j):
+                    blokrada.append(sloupec(k)+u[1]) #seznam polí
+        print (blokrada)
 
+        bloksloupec = []
+        for i in range(len(sloup)):
+            j = sloup[i]
+            j = int(j[1])
+            if int(u[1]) < j: #figura je dole, ruší se pole nad
+                for k in range(j+1,radky+1):
+                    bloksloupec.append(u[0]+str(k))
+            elif int(u[1]) > j: #figura je nahoře, ruší se pole pod
+                for k in range (1,j):
+                    bloksloupec.append(u[0]+str(k))
+        blok = blokrada + bloksloupec
+        print (blok)
+        return blok
 
 
 
@@ -199,8 +265,17 @@ def Koncovka(rdk,slp):
 
     #TESTOVÉ PROGRAMY
     pozice = Generuj()
-    print (Celapozice(pozice,40))
-    print (Polefigury(pozice,40,2))
-    print (Barvafigury(2))
-Koncovka(3,3)
+    def Test(databaze,cislo):
+        print (Celapozice(databaze,cislo))
+        def Testuplne(databaze,cislo):
+            print (Charak(databaze,cislo,2,"vse"))
+            print (Charak(databaze,cislo,2,"praz"))
+            print (Charak(databaze,cislo,2,"soup"))
+            print (Charak(databaze,cislo,2,"vlas"))
+            print (Charak(databaze,cislo,2,"obsa"))
+        Testuplne(databaze,cislo)
+    #Pozice jsou uložené o řádek níž, takže při pozici z řádku 721 zadávej číslo 720
+    Test(pozice,863)
+    BlokVezi(pozice,863,2)
+Koncovka(4,4)
 
