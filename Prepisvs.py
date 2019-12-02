@@ -284,19 +284,38 @@ def Koncovka(rdk,slp):
     #Král
     
     def LegalKral(databaze,cislo,figura):
-        zakaz = DoSachu(databaze,cislo,figura)+Charak(databaze,cislo,figura,"vlas")
+        j = (TahyNeom(databaze,cislo,figura))[:] #seznam všech tahů
+        zakaz = []
+        for i in range(len(j)):
+            if DoSachu(databaze,cislo,figura,j[i]) == True:
+                zakaz.append(j[i])
+        zakaz = zakaz+Charak(databaze,cislo,figura,"vlas")
         return (list(set(TahyNeom(databaze,cislo,figura)) - set(zakaz)))
     
     def DoSachu(databaze,cislo,figura,tah):
-        if figura == 1: #cerny tahne
-            if JeSach(finalpozice(tah)) == "Cerny":
-                return True
-        elif figura == 0: #bily tahne
-            if JeSach(finalpozice(tah)) == "Bily":
-                return True
+        if Presunpozice(databaze,cislo,figura,tah) in databaze:
+            if figura == 1: #cerny tahne
+                if JeSach(databaze,databaze.index(Presunpozice(databaze,cislo,figura,tah))) in ["Cerny","Oba"]:
+                    return True
+            elif figura == 0: #bily tahne
+                if JeSach(databaze,databaze.index(Presunpozice(databaze,cislo,figura,tah))) in ["Bily","Oba"]: #SPRAVIT CHYBU
+                    return True
             return False
-        return False
-
+        else:
+            return True
+    def BraniKral(databaze,cislo,figura):
+        br = []
+        j = Charak(databaze,cislo,figura,"soup")
+        k = LegalKral(databaze,cislo,figura)
+        for i in range(len(j)):
+            if j[i] in k:
+                br.append(j[i])
+        return br
+    def Brani(databaze,cislo,figura):
+        if figura == 0 or figura == 1:
+            BraniKral(databaze,cislo,figura)
+        elif figura == 2:
+            BraniVez(databaze,cislo,figura)
     #Je šach?
     def JeSach(databaze,cislopozice):
         sach = ""
@@ -308,9 +327,32 @@ def Koncovka(rdk,slp):
                     sach = "Bily"
                     break
         k = 1 #cerny kral
+        for i in range(0,len(j)-2):
+            if j[i]!="X":
+                if j[k] in Brani(databaze,cislopozice,i): #totéž
+                    if sach == "Bily":
+                        return "Oba"
+                    else:
+                        return "Cerny"
+        if sach == "Bily":
+            return "Bily"
+        else:
+            return "Nikdo"
+
+    #KÓD NAHRADIT!!!!!
+    def JeSachObecne(pozice):
+        sach = ""
+        j = pozice[:]
+        k = 0 #bílý král
+        for i in range(1,len(j)-2):
+            if j[i]!="X":
+                if j[k] in Brani(databaze,cislopozice,i): #může-li být král sebrán figurou...
+                    sach = "Bily"
+                    break
+        k = 1 #cerny kral
         for i in range(0,len(j)):
             if j[i]!="X":
-                if j[k] in Charak(databaze,cislopozice,i): #totéž
+                if j[k] in Brani(databaze,cislopozice,i): #totéž
                     if sach == "Bily":
                         return "Oba"
                     else:
@@ -321,7 +363,28 @@ def Koncovka(rdk,slp):
             return "Nikdo"
 
 
-
+    #4. PŘESUN
+    def Finalpozice(databaze,cislo,figura,pole):
+        #Je tah legální(v seznamu možných tahů)?
+        if figura == 0 or figura == 1:
+            if pole in LegalKral(databaze,cislo,figura):
+                j = (databaze[cislo])[:]
+                j[figura] = pole
+            else:
+                return "Nelegalni"
+        elif figura == 2:
+            if pole in LegalVez(databaze,cislo,figura):
+                j = (databaze[cislo])[:]
+                j[figura] = pole
+            else:
+                return "Nelegalni"
+        return j
+    def Presunpozice(databaze,cislo,figura,pole): #Narozdíl od Finalpozice toto pouze řeší vzniknutí nové pozice přesunutím dané figury
+        j = (databaze[cislo])[:]
+        j[figura] = pole
+        return j
+    #Které pozice mohou vzniknout? (obecně ty, které obsahují ostatní figury na stejných místech)
+        
 
 
 
