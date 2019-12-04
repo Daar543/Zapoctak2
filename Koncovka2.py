@@ -210,6 +210,12 @@ def Koncovka(rdk,slp):
         elif figura == 2:
             return TahVezi(Polefigury(databaze,cislo,figura))
         return
+    def TahyObec(databaze,cislo,figura): #tahy nikoli neomezené, ale neřeším legalitu
+        if figura == 0 or figura == 1:
+            return TahKralem(Polefigury(databaze,cislo,figura)) #vrací list
+        elif figura == 2:
+            return MuzeVez(databaze,cislo,figura) #vrací list
+        return
     #VYHLEDÁVACÍ FUNKCE
     def Celapozice(databaze,cislo):
         return databaze[cislo]
@@ -315,6 +321,8 @@ def Koncovka(rdk,slp):
         if figura == 0 or figura == 1:
             return BraniKral(databaze,cislo,figura)
         elif figura == 2:
+            if figura  == "X":
+                return
             return BraniVez(databaze,cislo,figura)
     #Je šach?
     def JeSach(databaze,cislopozice):
@@ -342,30 +350,37 @@ def Koncovka(rdk,slp):
             return "Bily"
         else:
             return "Nikdo"
-
-    #KÓD NAHRADIT!!!!!
-    def JeSachObecne(pozice):
-        sach = ""
-        j = pozice[:]
-        k = 0 #bílý král
-        for i in range(1,len(j)-2):
-            if j[i]!="X":
-                if j[k] in Brani(databaze,cislopozice,i): #může-li být král sebrán figurou...
-                    sach = "Bily"
-                    break
-        k = 1 #cerny kral
-        for i in range(0,len(j)):
-            if j[i]!="X":
-                if j[k] in Brani(databaze,cislopozice,i): #totéž
-                    if sach == "Bily":
-                        return "Oba"
-                    else:
-                        return "Cerny"
-        if sach == "Bily":
+    def JeMat(databaze,cislopozice):
+        #nemám dodefinované braní
+        j = databaze[cislopozice]
+        if JeSach (databaze,cislopozice) == "Cerny":
+            for i in range(1,len(j)-2,2):
+                k = TahyObec(databaze,cislopozice,i) #list cílových polí
+                for n in range(len(k)):
+                    r =  Presunpozice(databaze,cislopozice,i,k[n]) #pozice vzniklá přesunutím jedné figury
+                    if r in databaze:
+                        v = databaze.index(r) #číslo pozice
+                        if JeSach (databaze,v) == "Cerny":
+                            continue
+                        else:
+                            return "Není" #není mat
+                    else: #nelegální pozice, není v DTB
+                        continue
+            return "Cerny"
+        elif JeSach (databaze,cislopozice == "Bily"):
+            for i in range(0,len(j)-2,2):
+                k = TahyObec(databaze,cislopozice,i) #list cílových polí
+                for n in range(len(k)):
+                    r =  Presunpozice(databaze,cislopozice,i,k[n]) #pozice vzniklá přesunutím jedné figury
+                    if r in databaze:
+                        v = databaze.index(r) #číslo pozice
+                        if JeSach (databaze,v) == "Cerny":
+                            continue
+                        else:
+                            return "Není" #není mat
+                    else: #nelegální pozice, není v DTB
+                        continue
             return "Bily"
-        else:
-            return "Nikdo"
-
 
     #4. PŘESUN
     def Finalpozice(databaze,cislo,figura,pole):
@@ -377,6 +392,8 @@ def Koncovka(rdk,slp):
             else:
                 return "Nelegalni"
         elif figura == 2:
+            if figura  == "X":
+                return
             if pole in MuzeVez(databaze,cislo,figura):
                 j = (databaze[cislo])[:]
                 j[figura] = pole
@@ -391,7 +408,16 @@ def Koncovka(rdk,slp):
     
 
 
-
+    #CESTA OD MATU - NEJTĚŽŠÍ
+    #referenční 74,79
+    def Matovanicislo1(databaze):
+        for i in range(len(databaze)//2,len(databaze)):
+            h = databaze[i]
+            if JeMat(databaze,i) == "Cerny":
+                j = databaze[i]
+                if j[3] == "CNT": #černý musí být na tahu, aby dostal mat
+                   j[4] = 0 #je mat, tzn. zbývá 0 tahů do matu
+            return i #vrátí číslo pozice, s kterou budem pracovat
 
 
 
@@ -422,20 +448,22 @@ def Koncovka(rdk,slp):
     #print(JeSach(pozice,725))
     
     def CharakterSachy(databaze): #příliš náročné - musí prověřit všechny tahy, jestli žádný není šach, tzn. je lepší situaci řešit až na místě (až se k pozici dostanu)
-        x = 1
+        x = 5
         for i in range(len(databaze)):
             databaze[i].append(JeSach(databaze,i))
             if i == (len(databaze)//100)*x:
                 print (100*i//len(databaze),"%")
-                x += 1
+                x += 5
 
 
-    CharakterSachy(pozice) #zrušit
-    Pis("Pozice",pozice,radky,sloupce) #taktéž
+    #CharakterSachy(pozice) #zrušit
+    #Pis("Pozice",pozice,radky,sloupce) #taktéž
     #Pozice jsou uložené o řádek níž, takže při pozici z řádku 721 zadávej číslo 720
     #Test(pozice,863)
-    #BlokVezi(pozice,863,2)
-Koncovka(8,8)
+    print(JeSach(pozice,78))
+    print(JeMat(pozice,78))
+    Matovanicislo1(pozice)
+Koncovka(3,3) #max 29 sloupců, kvůli znakům
 
 
 
